@@ -1,0 +1,275 @@
+\documentclass{article}
+\usepackage[a4paper,total={170mm,257mm},left=15mm,right=15mm, top=20mm,bottom=25mm]{geometry}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\begin{document}
+\begin{center}
+	\LARGE \textbf{Computer Networks}\\
+	\vspace{20pt}
+\end{center}
+\tableofcontents
+\large
+	\section{IP addresses:}
+	\begin{itemize}
+		\item IP address in IPv4 are of 32 bits, represented as 8.8.8.8 bits.
+		\item Primarily consist of 2 parts, first $n$ bits as network ID and rest $32-n$ as Host ID.
+		\item IP address can represent $2^n$ different networks of $2^{32-n}$ hosts each.
+		\item Divided into 5 classes:\begin{itemize}
+			\item Class A: \begin{itemize}
+				\item Addresses starting with 0.
+				\item Range: 0.0.0.0-127.255.255.255, total $2^{31}$ addresses.
+				\item First 8 bits are network ID, of which first bit has to be 0. So, $2^7=128$ combinations are possible for network ID part.
+				\item Last 24 bits are Host ID. i.e. 16M IP addresses per network are possible.
+			\end{itemize}
+			\item Class B: \begin{itemize}
+				\item Addresses starting with 10.
+				\item Range: 128.0.0.0-191.255.255.255, total $2^{30}$ addresses.
+				\item First 16 bits are network ID, of which first 2 bits have to be 10. So, $2^{14}=16K$ combinations are possible for network ID part.
+				\item Last 16 bits are Host ID. i.e. 64K IP addresses per network are possible.
+			\end{itemize}
+			\item Class C: \begin{itemize}
+				\item Addresses starting with 110.
+				\item Range: 192.0.0.0-223.255.255.255, total $2^{29}$ addresses.
+				\item First 24 bits are network ID, of which first 3 bits have to be 110. So, $2^{21}=2M$ combinations are possible for network ID part.
+				\item Last 8 bits are Host ID. i.e. 255 IP addresses per network are possible.
+			\end{itemize}
+			\item Class D and E: \begin{itemize}
+				\item Addresses starting with 1110 and 1111 repsectively.
+				\item Range: 224.0.0.0-239.255.255.255, and 240.0.0.0 to 255.255.255.255. total $2^{28}$ addresses each.
+				\item No number of bits are specified as network ID or host ID.
+			\end{itemize}
+		\end{itemize}
+		\item 1st IP address of each network is used to denote the ID of network as a whole. i.e. all host ID bits as 0.\\
+		e.g. 10.0.0.0 is used to represent a class A network. 130.25.0.0 is used to represent a class B network, etc.
+		\item If a message is to be sent to all the hosts in a network, it is called a broadcast. \begin{itemize}
+			\item If a host inside the network is to do a broadcast, it is called a \textbf{Limited Broadcast}. Done by setting destination address to 255.255.255.255.
+			\item If a host outside the network is to do a broadcast to a network, it is called a \textbf{Directed Broadcast}. If message is to be broadcasted to e.g. 130.20.0.0, destination address is set as 130.20.255.255. that is, set all the host ID bits as 1.
+		\end{itemize}
+		\item This is why, if $k$ bits represent host ID, $2^k-2$ hosts can be configured, as first and last IP address is reserved for network ID and directed broadcast respectively.
+	\end{itemize}
+	\subsection{Subnetting:}
+	\begin{itemize}
+		\item Subnetting is done to divide the networks into multiple parts, and to address the different parts independently.
+		\item If a network is to be divided into 2 different parts, one bit from host ID part is reserved to denote the subnet. For 4 parts, 2 bits are reserved and so on.
+		\item E.g. network 130.20.0.0 is to be divided into 2 parts, $16^{th}$ bit is used to denote the subnet ID.
+		\item Subnets are:
+		\begin{enumerate}
+			\item From 130.20.0.0 to 130.20.127.255.
+			\item From 130.20.128.0 to 130.20.255.255.
+		\end{enumerate} $2^{16}$ IPs are divided into 2 subnets of $2^{15}$ IPs each.
+		\item Similar to networks, first IP in a subnet denotes that subnet, and last ID is the directed broadcast address. That is, for the first subnet, 130.20.0.0 is subnet ID, and 130.20.127.255 is directed broadcast address.
+		\item Here, 130.20.255.255 is directed broadcast address for both the network 130.20.0.0, and the subnet 130.20.128.0. This may result in ambiguity. To resolve this, if a message with destination 130.20.255.255 is received\begin{itemize}
+			\item from outside the network, it is sent to all the hosts inside the network, as external networks are not aware of the subnets that exist inside the network.
+			\item from within the network itself, it is sent to hosts inside the subnet 130.20.128.0 only.
+		\end{itemize}
+		\item Here, first and last IP of each subnet is reserved for the ID and the directed broadcast address. So, total $2^{16}-4$ hosts can be configured (for 2 subnets).
+		\item To get the subnet ID of a particular host, the IP address of that host is anded with a \textit{subnet mask}. This mask contains ones in the network ID and subnet ID part, and zeros in the host ID part. \\E.g. for a host  130.20.138.23, subnet mask is 255.255.128.0, i.e. 17 ones followed by 15 zeros. Result after anding with the mask will be 130.20.128.0, which is the subnet ID of the subnet to which this IP belongs.
+		\item By choosing 2 bits, network can be divided into 4 subnets of $2^{14}$ IPs each.
+		\item If, for example, we want 3 subnets of size $2^{15}, 2^{14},$ and $2^{14}$ IPs, subnet ID is of variable length, and follows the same approach as division into classes.
+		\item E.g. \begin{enumerate}
+			\item If host ID starts with 0, IP belongs to subnet 1, 130.20.0.0 to 130.20.127.255, total $2^{15}$ IPs.
+			\\ Mask: 255.255.128.0
+			\item If host ID starts with 10, IP belongs to subnet 2, 130.20.128.0 to 130.20.191.255, total $2^{14}$ IPs.
+			\\ Mask: 255.255.192.0
+			\item If host ID starts with 11, IP belongs to subnet 3, 130.20.192.0 to 130.20.255.255, total $2^{14}$ IPs.
+			\\ Mask: 255.255.192.0
+		\end{enumerate}
+		\item Subnet ID is determined by checking if the IP anded with the mask matches any present subnet ID. In case of variable length subnet ID, multiple matches are possible. In that case, ID where mask contains more ones is chosen.
+	\end{itemize}
+	\subsection{Classless Inter Domain Routing:}
+	\begin{itemize}
+		\item $2^{24}, 2^{16}$, and $2^{8}$ IPs are available in class A, B, and C type network respectively. So, if the requirement is, say 300, we'll have to go for the class B network which has a capacity of 64K, which is way too much for our application.
+		\item This is why there was a need of a better system. So, CIDR was introduced. There are no classes in CIDR, so it is not possible to tell how much is the network ID part, and how much is the host ID part. So in CIDR, IP addresses are represented as a.b.c.d/n where n is no. of bits in the network ID.
+		\item In CIDR system, one can ask for a "block" of IP addresses. A block can be of variable size. For the block to be qualified as a valid block, there are 3 rules: \begin{enumerate}
+			\item All the IPs in one block must be continuous.
+			\item No. of IPs in one block should be a power of 2. This is because it is easier to break the IP into N\_ID and H\_ID parts.
+			\item First IP in every block should be evenly divisible by the size of the block $(2^n)$. This basically means all bits of first IP address after block ID should be 0. This is how $2^n$ IP addresses are formed from $n$ zeros to $n$ ones.
+		\end{enumerate}
+		\item A CIDR block can be represented in a.b.c.d/n form, where a.b.c.d is an IP in the block, and n is number of bits in N\_ID part. First IP in the block can be found out by making the last $32-n$ bits 0, and the last IP can be found by making those bits 1.
+		\item Every CIDR block can also be subnetted using the same logic used in class system, with constant length subnet masks or variable length subnet masks.
+		\item If a block is divided into 2 subnets, 1 bit will be used to indicate the subnet. In that case, the IP will be represented as a.b.c.d/n+1, as one more bit is used to indicate the block ID.
+	\end{itemize}
+	\subsection{Supernetting:}
+	\begin{itemize}
+		\item Combining 2 or more networks to decrease the contents of routing table.
+		\item For 2 or more networks to be combined, they should satisfy 3 conditions:\begin{enumerate}
+			\item All the networks should be contigious.
+			\item Size of all the networks should be same and a power of 2, so that no. of bits representing H\_ID are same.
+			\item 1st IP address in the first network should be evenly divisible by the total size of the supernet.
+		\end{enumerate}
+		\item Combined mask of the resulting supernet contains 0s in H\_ID part and part of the network ID that is changing, and 1s at all other positions.\\
+		E.g. if the networks 130.20.0.0, 130.20.1.0, 130.20.2.0, 130.20.3.0 are to me aggregated, new supernet mask will be 255.255.252.0.
+		\item Supernet ID can be found by anding any IP in the supernet by supernet mask.
+	\end{itemize}
+
+\section{Delays:}
+\begin{itemize}
+	\item Transmission delay ($T_t$): time taken by host to put the data packet onto the transmission link.\\
+		If available bandwidth is $B$ bits/sec, and the size of data packet is $L$ bits, transmission delay is $\frac{L}{B}$.
+	\item Propagation delay ($T_p$): time taken by a bit to reach from sender to the receiver through the transmission link.
+	\item Queueing delay: time spent by the message in receiver's queue.
+	\item Processing delay: time talen by receiver to process the message.
+\end{itemize}
+
+\section{Flow Control:}
+\begin{itemize}
+	\item Synchronization betweeen data
+	\item Stop and wait:\begin{itemize}
+		\item Send a packet, and wait for the acknowledgement.
+		\item Will take $T_t + 2T_p$ time, in which $T_t$ is used to transmit the data, and we wait for $2T_p$ time.
+		\item Efficiency is $\frac{useful\ time}{Total\ time}$, which is $\frac{T_t}{T_t+2T_p}$.
+		\item $\eta = \frac{1}{1+2a}$ where $a=\frac{T_p}{T_t}$.
+		\item A timeout timer is also there at sender side. If ack is not received within a specific time, sender will assume that the packet was lost and send it again.
+	\end{itemize}
+	\item Capacity of channel - no. of bits that can be held by the channel at a time. Equal to $B*T_p$.
+	\item To increase $\eta$, pipelining is used, i.e. instead of waiting for $2T_p$ time, keep sending the packets.
+	\item In $T_t + 2T_p$ time, $1+2a$ packets can be sent, when the last packet is sent, ack for first packet will be received. Sending $1+2a$ packets will result in 100\% efficiency.
+	\item In case some data is lost and ack is not received, it'll need to be resent. So, $1+2a$ packets will be stored in a ``window". Once the ack for earliest packet is received, that packet will be removed from window, and next packet will be added.
+	\\This is also called sliding window protocol.
+	\item To indicate packet number, a sequence number is included in the packet. If there are $n$ bits, upto $2^n$ packets can be sent in one window.
+	\item Sequence numbers are generally reused, i.e. for example if there are 2 bits, sequence numbers are 0, 1, 2, 3, 0, 1, 2\dots and so on.
+	\item If number of bits don't allow $1+2a$ packets, we will have to wait till the ack for packet 0 is received. In this case, efficiency is not 100\%, it is $\frac{2^n}{1+2a}$ where $n$ is number of bits.
+	\item Ways to Implement sliding window protocol:\begin{enumerate}
+		\item Go Back N (GBN): \begin{itemize}
+			\item Window size is $N$. e.g. GB10 has $W_S$ of 10.
+			\item Sender will send packet number $N+1$ only when ack for packet 0 is received.
+			\item If some packet is lost, timeout timer for that packet will be triggered, and sender will send all the packets including and following the lost packet. i.e. sender will ``Go Back $N$'' packets.
+			\item Uses cumulative ack, i.e. multiple packets are acknowledged at once. Whenever a packet is received, ack timer starts, and at the end of the timer, if last packet received is N, ackN+1 is sent.
+			\item Acknowledgement timer at receiver should be greater than timeout timer at sender.
+			\item Available sequence numbers should be greater than $W_S$, to avoid data duplication \\problem.
+			\item Cannot accept out of order packets.
+		\end{itemize}
+		\item Selective Repeat (SR):\begin{itemize}
+			\item Receiver window size is same as sender window size.
+			\item Whenever a packet is lost, only that packet is retransmitted. This reduces the number of total transmitted packets.
+			\item Acknowledges every packet separately. If some packet is received but it is corrupted, a `nack' is sent. Whenever a nack is received, that packet is retransmitted immediately.
+			\item Can accept out of order packets.
+		\end{itemize}
+	\end{enumerate}
+\end{itemize}
+\section{Access Control:}
+\begin{itemize}
+	\item Needed to avoid collisions in broadcasting channel.
+	\item \textbf{Time Division Multiplexing:}\begin{itemize}
+		\item Slots of time are reserved for every host in the network. It is of length $T_t+T_p$.
+		\item Not very efficient as many slots may go wasted.
+	\end{itemize}
+	\item \textbf{Polling:}\begin{itemize}
+		\item Pole is conducted and slot is given to the winner.
+		\item May result in one host gettting too many slots, and others no slots at all.
+	\end{itemize}
+	\item \textbf{Carrier Sensing Multiple Access/Collision Detection (CSMA/CD):}\begin{itemize}
+		\item Every host senses the carrier, whether it is empty or not. If it is empty, host sends the data. If it's not, host waits.
+		\item There are no acknowledgements, so the sender has to detect if there is any collision in the channel.
+		\item Packet will be in the channel for $T_p$ time, and if the collision is at the end of the channel, it'll take another $T_p$ time to reach to the original sender. Sender keeps looking for collisions for as long as the data is being transmitted. $\therefore T_t>2T_p$, or $L>2*T_p*BW$.
+		\item If the data is less than the required length, additional bits are padded.
+		\item Backoff Algorithm: \begin{itemize}
+			\item If a collision is detected by 2 hosts, and both stop sending the data, and both start sending at the same time, there will be an infinite collision loop. This algorithm is used to avoid this situation.
+			\item A waiting time $T_S$ is decided, which is approximate time taken for collision signal to leave the channel.
+			\item Sender counts the number of collisions faced by the packet it is about to send. If there are $n$ collisions, it generates a random number $k$ between 0 and $(2^n-1)$, and it waits for $k*T_S$ time before starting transmission.
+			\item For example, if 2 hosts, $A$ and $B$ start transmitting data, and collision is detected after some time, Both stop and generate a number between 0 and $2^1-1=1$. In 01 and 10 cases, one host sends the data and the other one waits. In 00 and 11 cases, collision happens.
+			\item If suppose $A$ wins and sends the data, and now $A$ wants to send another packet, and the $2^{nd}$ packet collides with $1^{st}$ packet of $B$. Now $n_A=1$, and $n_B=2$ as packet 1 from $B$ has collided 2 times.
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+\begin{center}
+	\line(1,0){500}
+\end{center}
+
+\section{Topologies}
+\renewcommand{\labelitemi}{-}
+\renewcommand{\labelitemii}{*}
+\begin{enumerate}
+	\item \textbf{Mesh}: every device in a network is connected to eachother.\begin{itemize}
+		\item $^nC_2$ cables.
+		\item $n-1$ ports per device, $n(n-1)$ total.
+		\item High reliability as even if one connection fails, there are many more options available.
+		\item Cost is high, as many cables are required.
+		\item Security is also high as there is point to point connection.
+		\item Generally used for LANs where $n$ is small.
+	\end{itemize}
+	\item \textbf{Star}: all devices are connected to a central device named \emph{hub}.\begin{itemize}
+		\item $n$ cables, from each device to hub.
+		\item 1 port per device, $N$ total.
+		\item Low reliability, as there is \emph{Single Point of Failure}(SPOF) i.e. if hub fails, communication stops.
+		\item Cost is lower than mesh.
+		\item Security is high as there is point to point connection.
+	\end{itemize}
+	\item \textbf{Bus}: there is one thick wire, and all devices are connected to that wire.\begin{itemize}
+		\item Thick central wire is called the backbone cable.
+		\item $n+1$ cables, one per device + backbone cable.
+		\item 1 port per device, $n$ total.
+		\item Low reliability as backbone cable is SPOF.
+		\item Cost is low.
+		\item Less secure as every message can be accessed by all devices in a network.
+		\item Has a limit to how long the backbone cable can be, repeaters are used if longer connection is required.
+		\item As all data is flowing through same cable, there is high chance of collision. So, access control methods are used.
+	\end{itemize}
+	\item \textbf{Ring}: same as bus, but the ends of backbone cable are joined to eachother.\begin{itemize}
+		\item All points in bus topology apply to ring as well, except the repeater one.
+	\end{itemize}
+\end{enumerate}
+\section{Devices}
+\begin{enumerate}
+	\item \textbf{Repeater}:
+	\begin{itemize}
+		\item Purely hardware, works only on physical layer.
+		\item Has 2 ports only.
+		\item Reads the signal, and restores the strength to the original value.
+		\item Cannot filter the messages, whatever is received will be forwarded.
+	\end{itemize}
+	\item \textbf{Hub}:\begin{itemize}
+		\item Also purely hardware, works on physical layer.
+		\item Multiport repeater.
+		\item Cannot filter, whatever is received will be forwarded to rest all ports.
+	\end{itemize}
+	\item \textbf{Bridge}:\begin{itemize}
+		\item Has 2 ports, used to connect 2 different LANs.
+		\item Works on physical and data link layer.
+		\item Message can be filtered if both sender and receiver are in the same network. This is checked using a table where record of where every device is connected is kept. This is of 2 types, \begin{itemize}
+			\item Static: network administrator has to manually enter the data, and update if some connection is changed.
+			\item Dynamic: Contents are updated automatically based on which port of the bridge receives a message from which device. e.g. if a message is received from device $d1$ at port 1, entry $|d1|$port1$|$ is added to table.\\If the entry is not present in the table, the message is forwarded by default.
+		\end{itemize}
+		Filtering takes place based on MAC addresses, as IPads are only accessible from network layer and above.
+		\item A buffer is present inside the bridge, so even if multiple messages are received at the same time, collision doesn't occur.
+	\end{itemize}
+	\item \textbf{Router:}\begin{itemize}
+		\item Has many ports, used to connect 2 or more different networks.
+		\item Works on physical, data link, and network layer.
+		\item Routing table is used to decide where to send the data after reception, based on the destination IP address.
+		\item Routing table contains the list of all N\_IDs and ports that are connected to those N\_IDs.
+		\item If a suitable port cannot be decided, data is sent to all the networks connected to it. This is called "flooding".
+		\item A port of a router connected to the network $A$ has an IP address that is present within the network $A$. Different ports of a router have different IP addresses.
+		\item A buffer is present, so there are no collisions.
+	\end{itemize}
+\end{enumerate}
+\section{Packet Switching}
+\renewcommand{\labelitemi}{\textbullet}
+\renewcommand{\labelitemii}{\textendash}
+\begin{itemize}
+	\item Data is divided into multiple packets and sent.
+	\item Datagrams (connectionless):
+	\begin{itemize}
+		\item Each packet is sent independantly, with sequence numbers.
+		\item Every packet has a separate header.
+		\item May be received out of order, then it is arranged in correct sequence.
+		\item Resources are not reserved, allocation is done on demand. This increases delays, but also increases efficiency.
+		\item Sliding window protocols are used.
+		\item Used in internet.
+	\end{itemize}
+	\item Virtual circuit (connection oriented):
+	\begin{itemize}
+		\item A packet called global header is sent first which reserves some resources along the path for the following message packets.
+		\item A virtual \emph{connection} is established, then all the message packets are sent sequentially.
+		\item Data received is in order, no need of rearrangement.
+		\item As resources are reserved till the connection is not ended, there are no delays, but it decreases efficiency.
+		\item Used in VoIP.
+	\end{itemize}
+\end{itemize}
+\section*{Cyclic Redundancy Check (CRC)}
+\begin{itemize}
+	\item Take message bits and append $n$ zeros to the end, where $n$ is degree of divisor polynomial.
+	\item Perform the division and replace the zeros at the end with the obtained remainder.
+	\item To check if a code is valid or not, perform the same operation. If 0 remainder is obtained, it is a valid code.
+\end{itemize}
+\end{document}

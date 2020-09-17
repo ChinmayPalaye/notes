@@ -114,11 +114,15 @@ Used for classifying the data into 2 or more classes.
 	\item Value of  $h^{(k)}_\theta(X)$ represents the probability that an element belongs to class $k$.
 	\item Class corresponding to maximum value of $h^{(k)}_\theta(X)$ is picked.
 \end{itemize}
-\section*{Regularization}
+
+\section{Regularization}
 \begin{itemize}
 	\item If there are too many features, and not many elements in the dataset, model may be too biased for the given dataset. It will fit the given points perfectly, but it'll fail to generalize, or it'll perform poorly on the test dataset. This problem is called as overfitting.
-	\item To avoid this, some extra features can be manually removed, but it is hard to choose what features to keep and what to remove.
-	\item Other method to remove this, is called regularization. For example, let's say the available dataset is approximately in a shape of parabola, but not exactly a parabola. So, we include quadratic, cubic, and $4^{th}$ degree terms.\\ This causes the model to overfit to the data.
+		\item To avoid this, some extra features can be manually removed, but it is hard to choose what features to keep and what to remove.
+		\item Other method to remove this, is called regularization. For example, let's say the available dataset is approximately in a shape of parabola, but not exactly a parabola. So, we include quadratic, cubic, and $4^{th}$ degree terms.\\ This causes the model to overfit to the data.
+	\end{itemize}
+\subsection{L2 Regularization}
+\begin{itemize}
 	\item So, let's say we \emph{penalize} $\theta_3$ and $\theta_4$ by adding the terms $1000\theta_3 + 1000\theta_4$ to the cost function. This will result in bigger cost when either of $\theta_3$ or $\theta_4$ are big. So the values of coefficients of higher degree terms will automatically be less, which will result in less dramatic curve. This is less prone to overfitting.
 	\item It's not always possible to choose the features to regularize, so as a convention, all parameters except $\theta_0$ are penalized.
 	\item Cost function with regularization looks like :
@@ -126,6 +130,13 @@ Used for classifying the data into 2 or more classes.
 	\item For both linear and logistic regression,
 	$$\frac{\partial J(\theta)}{\partial \theta_j}=\frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)})-y^{(i)})x_j^{(i)} + \frac{\lambda}{m} \theta_j$$
 	\item If value of $\lambda$ is set too large, $\theta_j\approx 0$ for $j=1$ to $n$. So, effective hypothesis will be\\ $h_\theta(X)=\theta_0$, which won't represent the data accurately either. This problem is called underfitting. Underfitting can also occur if there aren't enough features to fit the data properly.
+\end{itemize}
+\subsection{Dropout}
+\begin{itemize}
+	\item Dropout is randomly making some nodes in the hidden layers as 0.
+	\item This makes the network smaller and makes it less prone to overfitting.
+	\item As nodes are \emph{turned off} randomly, network does not rely too much on one single feature.
+	\item Difficult to calculate the cost function as nodes are turned off randomly.
 \end{itemize}
 
 \section{Neural Networks}
@@ -136,7 +147,7 @@ Used for classifying the data into 2 or more classes.
 	\item Activation of unit $i$ in layer $l$ is represented by $a^{(l)}_i$.
 	\item Matrix containing weights that map layer $l$ to layer $l+1$ is represented as $\Theta^{(l)}$.
 	\item Vector of linear combinations of previous layer is denoted by $z^{(l)} = \Theta^{(l-1)} a^{(l-1)}$, and $a^{(l)}=g(z^{(l)})$.\\
-	So, $a^{(2)}=g(\Theta^{(1)} X)$, $a^{(3)}=g(\Theta^{(1)} a^{(2)})$, and so on. In a 3 layer NN, $h_\Theta(X) = a^{(3)}$.
+	So, $a^{(2)}=g(\Theta^{(1)} X)$, $a^{(3)}=g(\Theta^{(1)} a^{(2)})$, and so on. In a 3 layer NN, $h_\Theta(X) = a^{(3)}$. Here, $g(z)$ can be any activation function.
 	\item In this case, $h_\Theta(X)$ is a vector of $K$ elements. $h_\Theta(X)_k$ represents $k^{th}$ element in that vector.
 	\item Generally, an additional unit with activation 1 is added in every layer. It is called the bias unit.
 	\item Cost function for NN is defined in a similar way as logistic regression.
@@ -161,9 +172,7 @@ Used for classifying the data into 2 or more classes.
 	\begin{itemize}
 		\item Find $\delta^{(l)}_j$ for every node, which may be thought of as error in activation for $j^{th}$ node in $l^{th}$ layer of network.
 		\item $\delta^{(L)} = a^{(L)}- y = h_\Theta(X)-y$.\\Delta value for output layer is simply the difference between obtained output and expected output.
-		\item $\delta^{(l)} = (\Theta^{(l)})^T \delta^{(l+1)}.*g'(z^{(l)})$\\Where $g'(z)$ is first derivative of the sigmoid function, $.*$ operator means element-wise multiplication of the elements.\begin{itemize}
-			\item $g'(z^{(l)}) = a^{(l)}.*(1-a^{(l)})$
-		\end{itemize}
+		\item $\delta^{(l)} = (\Theta^{(l)})^T \delta^{(l+1)}.*g'(z^{(l)})$\\Where $g'(z)$ is first derivative of the activation function, $.*$ operator means element-wise multiplication of the elements.For sigmoid, $g'(z^{(l)}) = a^{(l)}.*(1-a^{(l)})$.
 		\item $\delta^{(1)}$ is not calculated, as error in input cannot be defined.
 		\item $\frac{\partial J(\Theta)}{\partial \Theta^{(l)}_{ij}} = a_j^{(l)}*\delta_i^{(l+1)}$ for all elements.
 	\end{itemize}
@@ -180,14 +189,61 @@ Used for classifying the data into 2 or more classes.
 	\end{itemize}
 	\item For more info on backprop, refer \href{https://youtu.be/Ilg3gGewQ5U}{this,} and \href{https://youtu.be/tIeHLnjs5U8}{this}.
 	\item In NN, all values of $\Theta$ parameters cannot be initialized to 0, or anything equal, as activations of different nodes in a layer is are linear combinations of activations of previous layer. Every node will be identical to every other node in that layer if all weights are equal. So, the weights need to be randomly initialized.
-	\item \textbf{Gradient Checking:}\begin{itemize}
+\end{itemize}
+	\subsection{Gradient Checking}\begin{itemize}
 		\item Even after implementing backprop, it's a good practice to check if it is working correctly.
 		\item To check, $$\frac{\partial J(\Theta)}{\partial \Theta} = \frac{J(\Theta-\epsilon)-J(\Theta-\epsilon)}{2\epsilon}$$ This is used.
-	\item To check $\frac{\partial J(\Theta)}{\partial \Theta^{(l)}_{ij}}$, value of $\Theta^{(l)}_{ij}$ is changed by $\epsilon$, rest are left as they were. Cost is calculated with this new $\Theta$, and approximate gradient is calculated.
-	\item If this approximate gradient matches the one calculated using backprop, it is implemented correctly.
-	\item This method of calculating gradient is computationally very slow, that's why backprop is used.
+		\item To check $\frac{\partial J(\Theta)}{\partial \Theta^{(l)}_{ij}}$, value of $\Theta^{(l)}_{ij}$ is changed by $\epsilon$, rest are left as they were. Cost is calculated with this new $\Theta$, and approximate gradient is calculated.
+		\item If this approximate gradient matches the one calculated using backprop, it is implemented correctly.
+		\item This method of calculating gradient is computationally very slow, that's why backprop is used.
 	\end{itemize}
-\end{itemize}
+	\subsection{Activation Functions}
+	\begin{enumerate}
+		\item Sigmoid: \begin{itemize}
+			\item $g(z) = $\LARGE$\frac{1}{1+e^{-z}}$\large
+			\item Maps the input between 0 and 1, centered around $0.5$.
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.5]{im/sigmoid.png}
+				\caption{Sigmoid}
+			\end{figure}
+		\end{itemize}
+		\item Tanh:\begin{itemize}
+			\item $g(z) = $\LARGE$\frac{e^z-e^{-z}}{e^z+e^{-z}}$\large
+			\item Maps the input between -1 and 1, centered around 0.
+			\item Almost always better than sigmoid.
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.5]{im/tanh.png}
+				\caption{Tanh}
+			\end{figure}
+		\end{itemize}\pagebreak
+		\item Rectified Linear Unit (ReLU):\begin{itemize}
+			\item \Large$g(z) = max(0,z)$\large
+			\item Makes all negative values 0, doesn't change the positive ones.
+			\item Most popular one.
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.5]{im/relu.png}
+				\caption{ReLU}
+			\end{figure}
+		\end{itemize}
+		\item LeakyReLU:\begin{itemize}
+			\item \Large$g(z) = max(0.01*z,z)$\large
+			\item Scales down negative values significantly, doesn't change positive values.
+			\item Improved version of ReLU.
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.5]{im/leakyrelu.png}
+				\caption{LeakyReLU}
+			\end{figure}
+		\end{itemize}
+	\end{enumerate}
+	\subsection{Vanishing Gradient}\begin{itemize}
+		\item For different activation functions like sigmoid or tanh, gradient of the function may approach 0 if magnitude of the inputs becomes too large.
+		\item One of the solutions to this is to use ReLU for which the gradient remains 1 for positive inputs.
+		\item If there are a lot of negative values, ReLU might be problematic as well. In that case, leakyReLU is used.
+	\end{itemize}
 \section{Diagnosing Errors}
 If a model is designed and trained, but it is not predicting the output as expected when new data is introduced to it, some changes need to be made. To decide the changes, there are some things that can be done.
 \begin{itemize}

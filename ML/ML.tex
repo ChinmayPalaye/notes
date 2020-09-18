@@ -5,7 +5,9 @@
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{hyperref}
+\usepackage{xcolor}
 \begin{document}
+\color{black}
 \begin{center}
 	\LARGE \textbf{Machine Learning}\\
 	\vspace{20pt}
@@ -136,6 +138,8 @@ Used for classifying the data into 2 or more classes.
 	\item Dropout is randomly making some nodes in the hidden layers as 0.
 	\item This makes the network smaller and makes it less prone to overfitting.
 	\item As nodes are \emph{turned off} randomly, network does not rely too much on one single feature.
+	\item A value \emph{keep\_prob} is set. A random number between 0 and 1 is generated for each node, and if it is greater than keep\_prob, activation is made 0.
+	\item $z$ values in the next layer are divided by keep\_prob before processing to keep the value within expected range.
 	\item Difficult to calculate the cost function as nodes are turned off randomly.
 \end{itemize}
 
@@ -238,6 +242,13 @@ Used for classifying the data into 2 or more classes.
 				\caption{LeakyReLU}
 			\end{figure}
 		\end{itemize}
+		\item Softmax:\begin{itemize}
+			\item Used exclusively for output layer of a classifier.
+			\item Takes a vector as input and outputs a vector of probabilities.
+			\item $g(z) = $\LARGE$\frac{e^{z}}{sum(e^z)}$\large
+			\item Sum of all the values in layer equals 1.
+			\item Cost for this is just the log of value corresponding to the correct class.
+		\end{itemize}
 	\end{enumerate}
 	\subsection{Vanishing Gradient}\begin{itemize}
 		\item For different activation functions like sigmoid or tanh, gradient of the function may approach 0 if magnitude of the inputs becomes too large.
@@ -292,6 +303,33 @@ If a model is designed and trained, but it is not predicting the output as expec
 	\item Similarly, having too few hidden layers/ hidden units may result in underfitting.
 \end{itemize}
 
-\section{Error Analysis}
+\section{Optimization Techniques}
+\begin{enumerate}
+	\item Gradient descent with momentum:\begin{itemize}
+		\item Let $d\theta$ be the gradient vector for all the parameters. In normal gradient descent, $\theta$ is updated proportional to $d\theta$, and prpopriotnality constant is the learning rate $\alpha$.
+		\item In this version, a vector $v\theta$ is defined. It is initialized as 0, and in every iteration, it is updated as $v\theta = \beta*v\theta + (1-\beta)*d\theta$ where $d\theta$ is gradient on that iteration.
+		\item $\theta$ is updated as $\theta = \theta -\alpha*v\theta$.
+		\item This is like applying a $low\ pass\ filter$ to the gradients. Results in damping the oscillations in directions of gradients.
+		\item Works faster than normal gradient descent, especially in mini-batch gradient descent.
+	\end{itemize}
+	\item RMSprop\begin{itemize}
+		\item Similar to above.\\$S_{d\theta}$ is initialized as 0 and updated as $S_{d\theta} = \beta*S_{d\theta} + (1-\beta)*d\theta^2$ where $d\theta^2$ is element wise square.
+		\item $\theta$ is updated as $\theta = \theta - \alpha * \frac{d\theta}{\sqrt{S_{d\theta}}+\epsilon}$, where $\epsilon$ is a small value which is added to avoid division by a very small number.
+		\item Here every gradient is divided by RMS of magnitudes of the gradient.
+	\end{itemize}
+	\item Adaptive Moment Estimation (Adam)\begin{itemize}
+		\item Combination of both momentum and RMSprop
+		\item $t^{th}$ low pass filtered output is divided by $1-\beta^t$ to correct the initial offset in case of a large $\beta$.
+		\item Here, both $v\theta$ and $S_{d\theta}$ are initialized to 0. In $t^{th}$ iteration,\begin{align*}
+			v\theta &= \beta_1*v\theta+(1-\beta_1)*d\theta\\
+			S_{d\theta} &= \beta_2*S_{d\theta} + (1-\beta_2)*d\theta^2\\
+			v\theta &= \frac{v\theta}{(1-\beta_1^t)}\\
+			S_{d\theta} &= \frac{S_{d\theta}}{(1-\beta_2^t)}\\
+			\theta &= \theta - \alpha*\frac{v\theta}{\sqrt{S_{d\theta}}+\epsilon}
+		\end{align*}
+		\item Generally, $\beta_1=0.9$ and $\beta_2=0.999$.
 
+	\end{itemize}
+\end{enumerate}
+\section{Error Analysis}
 \end{document}
